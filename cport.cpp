@@ -24,7 +24,7 @@ void f(int* N, double* X, int* /*NF*/, double* F, int* /*UI*/, double* /*UR*/, v
 int drmn_test()
 {
 	double x[] = { 1,2 };
-	port::drmn p(2, x);
+	port::dmnf p(2, x);
 #if 0
 	auto f = [](int* N, double* X, int* /*NF*/, double* F, int* /*UI*/, double* /*UR*/, void* /*UF*/) {
 		*F = 0;
