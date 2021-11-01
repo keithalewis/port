@@ -28,5 +28,8 @@
     <ClInclude Include="port.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

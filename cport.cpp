@@ -14,10 +14,26 @@ int d1mach_test()
 }
 int d1mach_test_ = d1mach_test();
 
+void f(int* N, double* X, int* /*NF*/, double* F, int* /*UI*/, double* /*UR*/, void* /*UF*/) {
+	*F = 0;
+	for (int i = 0; i < *N; ++i) {
+		*F += X[i] * X[i];
+	}
+}
+
 int drmn_test()
 {
 	double x[] = { 1,2 };
-	port::drmn(2, x);
+	port::drmn p(2, x);
+#if 0
+	auto f = [](int* N, double* X, int* /*NF*/, double* F, int* /*UI*/, double* /*UR*/, void* /*UF*/) {
+		*F = 0;
+		for (int i = 0; i < *N; ++i) {
+			*F += X[i] * X[i];
+		}
+	};
+#endif
+	p.solve(f);
 
 	return 0;
 }
