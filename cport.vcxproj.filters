@@ -25,7 +25,7 @@
     </Library>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="port.h">
+    <ClInclude Include="dmn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cport.h">

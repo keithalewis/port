@@ -24,10 +24,13 @@ namespace port {
 		dmnf& operator=(const dmnf&) = delete;
 		~dmnf()
 		{ }
-		void solve(QF qf)
+		void solve(QF qf, int* ui = 0, double* ur = 0, void* dummy = 0)
 		{
-			DMNF(&n, d.data(), x.data(), qf, iv, &liv, &lv, v.data(), 0/*UI*/, 0/*UR*/, 0/*DUMMY*/);
+			DMNF(&n, d.data(), x.data(), qf, iv, &liv, &lv, v.data(), ui, ur, dummy);
 		}
 	};
+
+	// class dmng // gradient
+	// class dmnh // hession
 
 } // namespace port
