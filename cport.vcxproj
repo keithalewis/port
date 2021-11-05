@@ -149,12 +149,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cport.cpp" />
+    <ClCompile Include="fms_allocation.t.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="x64\Debug\port.lib" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cport.h" />
+    <ClInclude Include="allocation.h" />
+    <ClInclude Include="port.h" />
     <ClInclude Include="dmn.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

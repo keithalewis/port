@@ -1,7 +1,7 @@
 // cport.cpp : Test PORT library
 #include <cassert>
 #include "dmn.h"
-#include "dmnb.h"
+
 
 int d1mach_test()
 {
@@ -15,8 +15,9 @@ int d1mach_test_ = d1mach_test();
 
 int dmnf_test()
 {
+	port::RETURN_CODE ret;
 	double x[] = { 1,2 };
-	port::dmnf p(2, x);
+	port::dmn p(2);
 
 	auto f = [](int* N, double* X, int* /*NF*/, double* F, int* /*UI*/, double* /*UR*/, void* /*UF*/) {
 		*F = 0;
@@ -24,18 +25,19 @@ int dmnf_test()
 			*F += X[i] * X[i];
 		}
 	};
-	p.solve(f);
+	ret = p.solve(x, f);
 
 	return 0;
 }
-int dmnf_test_ = dmnf_test();
+//int dmnf_test_ = dmnf_test();
 
 int dmnfb_test()
 {
+	port::RETURN_CODE ret;
 	double x[] = { 1,2 };
 	double l[] = { 0.5, 0.5 };
 	double u[] = { DBL_MAX, DBL_MAX };
-	port::dmnfb p(2, x, l, u);
+	port::dmn p(2);
 
 	auto f = [](int* N, double* X, int* /*NF*/, double* F, int* /*UI*/, double* /*UR*/, void* /*UF*/) {
 		*F = 0;
@@ -43,11 +45,13 @@ int dmnfb_test()
 			*F += X[i] * X[i];
 		}
 	};
-	p.solve(f);
+	p.lower(l);
+	p.upper(u);
+	ret = p.solve(x, f);
 
 	return 0;
 }
-int dmnfb_test_ = dmnfb_test();
+//int dmnfb_test_ = dmnfb_test();
 
 int main()
 {

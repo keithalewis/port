@@ -1,36 +1,85 @@
-// port.h - PORT library header
+// dmn.h - PORT optimization routines
 #pragma once
-#include "cport.h"
+#include "port.h"
 #include <vector>
 
 namespace port {
 
 	// minimize unconstrained objective function
-	class dmnf {
-		int liv, lv, n;
-		int iv[59];
-		std::vector<double> d, v, x;
-	public:
-		typedef void(*QF)(int* N, double* X, int* NF, double* F, int* UI, double* UR, void* UF);
-
-		dmnf(int n, const double* x)
-			: liv(59), lv(77 + n * (n + 17) / 2), n(n), d(n, 1), v(lv), x(x, x + n)
+	struct dmn {
+		int n, liv, lv;
+		std::vector<int> iv;
+		std::vector<double> v, d;
+		std::vector<double> b; // optional lower and upper bounds
+		
+		// initialize upper and lower bounds
+		void bounds()
 		{
-			//int kind = 2;
-			iv[0] = 0;
-			//DIVSET(&kind, iv, &liv, &lv, v.data());
+			b.resize(2 * n);
+			double x = DBL_MAX;
+			upper(&x, 0);
+			x = -x;
+			lower(&x, 0);
 		}
-		dmnf(const dmnf&) = delete;
-		dmnf& operator=(const dmnf&) = delete;
-		~dmnf()
+
+		// reverse communication functions
+		typedef void(*FG)(int* N, double* X, int* NF, double* F, int* UI, double* UR, void* UF);
+
+		dmn(int n)
+			: n(n), liv(59 + 3*n), lv(78 + n * (n + 15)), iv(liv), v(lv), d(n, 1)
 		{ }
-		void solve(QF qf, int* ui = 0, double* ur = 0, void* dummy = 0)
-		{
-			DMNF(&n, d.data(), x.data(), qf, iv, &liv, &lv, v.data(), ui, ur, dummy);
-		}
-	};
+		dmn(const dmn&) = delete;
+		dmn& operator=(const dmn&) = delete;
+		~dmn()
+		{ }
 
-	// class dmng // gradient
-	// class dmnh // hession
+		// set lower bounds
+		void lower(const double* l, size_t stride = 1)
+		{
+			if (b.size() == 0) {
+				bounds();
+			}
+			for (int i = 0; i < n; ++i) {
+				b[2 * i] = l[i * stride];
+			}
+		}
+		// set upper bounds
+		void upper(const double* u, size_t stride = 1)
+		{
+			if (b.size() == 0) {
+				bounds();
+			}
+			for (int i = 0; i < n; ++i) {
+				b[2 * i + 1] = u[i * stride];
+			}
+		}
+
+		// function
+		RETURN_CODE solve(double* x, FG f, int* ui = 0, double* ur = 0, void* dummy = 0)
+		{
+			if (b.size() == 0) {
+				DMNF(&n, d.data(), x, f, iv.data(), &liv, &lv, v.data(), ui, ur, dummy);
+			}
+			else {
+				DMNFB(&n, d.data(), x, b.data(), f, iv.data(), &liv, &lv, v.data(), ui, ur, dummy);
+			}
+
+			return (RETURN_CODE)iv[0];
+		}
+
+		// function and gradient
+		RETURN_CODE solve(double* x, FG f, FG g, int* ui = 0, double* ur = 0, void* dummy = 0)
+		{
+			if (b.size() == 0) {
+				DMNG(&n, d.data(), x, f, g, iv.data(), &liv, &lv, v.data(), ui, ur, dummy);
+			}
+			else {
+				DMNGB(&n, d.data(), x, b.data(), f, g, iv.data(), &liv, &lv, v.data(), ui, ur, dummy);
+			}
+
+			return (RETURN_CODE)iv[0];
+		}
+		// void solve(/*QF f,*/ QF g, QF h ... call DMNFH
+	};
 
 } // namespace port

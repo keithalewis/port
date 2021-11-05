@@ -18,6 +18,9 @@
     <ClCompile Include="cport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="fms_allocation.t.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="x64\Debug\port.lib">
@@ -28,7 +31,10 @@
     <ClInclude Include="dmn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cport.h">
+    <ClInclude Include="port.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="allocation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
