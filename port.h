@@ -3,6 +3,8 @@
 
 extern "C" {
 	double D1MACH(int*);
+	// W = A X + Y
+	void DV2AXY(int* N, double* W, double* A, double* X, double* Y);
 	void DIVSET(int* ALG, int* IV, int* LIV, int* LV, double* V);
 	// solve LX = Y
 	void DL7IVM(int* N, double* X, double* L, double* Y);

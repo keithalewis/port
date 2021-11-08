@@ -71,7 +71,7 @@ namespace port {
 		~allocation()
 		{ }
 
-		// minimize (1/2) xi' Cov xi given xi . 1 = 1 and xi . ER = R
+		// minimize (1/2) xi' Cov xi - lambda (xi . 1 - 1) - mu (xi . ER - R)
 		// D_xi F = Cov xi - lambda . 1 - mu ER
 		// D^2_xi F = Cov;
 		double minimize(double R, double* x, const double* l = 0, const double* u = 0) const
@@ -86,28 +86,12 @@ namespace port {
 			x[n] = lambda;
 			x[n + 1] = mu;
 
+			double sigma = sqrt((A * R * R - 2 * B * R + C) / D);
 			if (!l and !u) { // closed form
-				return sqrt((A * R * R - 2 * B * R + C) / D);
+				return sigma;
 			}
 
 			dmn p(n + 2);
-
-			if (l) {
-				p.lower(l);
-				for (int i = 0; i < n; ++i) {
-					if (x[i] < l[i]) {
-						x[i] = l[i];
-					}
-				}
-			}
-			if (u) {
-				p.upper(u);
-				for (int i = 0; i < n; ++i) {
-					if (x[i] > u[i]) {
-						x[i] = u[i];
-					}
-				}
-			}
 
 			auto f = [](int* N, double* X, int* /*NF*/, double* F, int* /*UI*/, double* UR, void* UF) {
 				int n = *N - 2;
@@ -137,6 +121,14 @@ namespace port {
 				G[n] = -(dot(n, X, &one, 0) - 1);
 				G[n + 1] = -(dot(n, X, p->ER) - R);
 			};
+
+			//auto h = [](int* N, double* X, int* /*NF*/, double* H, int* /*UI*/, double* UR, void* UF) {
+		
+			double fg[4];
+			int N = n + 2;
+			f(&N, x, &N, fg, &N, &R, (void*)this);
+			g(&N, x, &N, fg, &N, &R, (void*)this);
+
 
 			RETURN_CODE ret;
 			ret = p.solve(x, f, g, 0, &R, (void*)this);
@@ -195,10 +187,10 @@ namespace port {
 				double sigma = *UR;
 				allocation* p = (allocation*)UF;
 				// F = xi' ER - lambda (xi'1 - 1) - mu (xi' Cov xi - sigma^2)/2
-				*F = dot(n, X, p->ER);
+				*F = -dot(n, X, p->ER);
 				double one = 1;
-				*F -= lambda * (dot(n, X, &one, 0) - 1);
-				*F -= mu * (quad(n, X, p->Cov) - sigma * sigma) / 2;
+				*F += lambda * (dot(n, X, &one, 0) - 1);
+				*F += mu * (quad(n, X, p->Cov) - sigma * sigma) / 2;
 			};
 
 			auto g = [](int* N, double* X, int* /*NF*/, double* G, int* /*UI*/, double* UR, void* UF) {
@@ -209,14 +201,14 @@ namespace port {
 				allocation* p = (allocation*)UF;
 
 				// G = D_xi F = ER - lambda . 1 - mu Cov xi
-				std::copy(p->ER, p->ER + n, G);
 				for (int i = 0; i < n; ++i) {
-					G[i] -= lambda;
-					G[i] -= mu * dot(n, X, p->Cov + i * n);
+					G[i] = -p->ER[i];
+					G[i] += lambda;
+					G[i] += mu * dot(n, X, p->Cov + i * n);
 				}
 				double one = 1;
-				G[n] = -(dot(n, X, &one, 0) - 1);
-				G[n + 1] -= (quad(n, X, p->Cov) - sigma * sigma) / 2;
+				G[n] = (dot(n, X, &one, 0) - 1);
+				G[n + 1] = (quad(n, X, p->Cov) - sigma * sigma) / 2;
 			};
 
 			RETURN_CODE ret;
