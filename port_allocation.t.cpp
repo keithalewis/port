@@ -1,6 +1,6 @@
-// fms_allocation.t.cpp - test allocation
+// port_allocation.t.cpp - test allocation
 #include <cassert>
-#include "allocation.h"
+#include "port_allocation.h"
 
 using namespace port;
 
@@ -16,30 +16,30 @@ int allocation_test()
 		double R, sigma;
 		{
 			R = ER[0];
-			sigma = p.minimize(R, x);
+			sigma = p.minimum(R, x);
 			assert(fabs(1 - x[0]) < 1e-13);
 			assert(fabs(0 - x[1]) < 1e-13);
-			R = p.maximize(sigma, x);
-			assert(fabs(ER[0] - R) < 1e-13);
+			//R = p.maximum(sigma, x);
+			//assert(fabs(ER[0] - R) < 1e-13);
 		}
 		{
 			R = ER[1];
-			sigma = p.minimize(R, x);
+			sigma = p.minimum(R, x);
 			assert(fabs(0 - x[0]) < 1e-13);
 			assert(fabs(1 - x[1]) < 1e-13);
 			R = p.maximize(sigma, x);
 			assert(fabs(ER[1] - R) < 1e-13);
 		}
 		{
-			R = ER[1];
-			sigma = p.minimize(R, x);
 			double l[] = { -DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX };
 			double u[] = { DBL_MAX, DBL_MAX, DBL_MAX, DBL_MAX };
 			assert(fabs(0 - x[0]) < 1e-13);
 			assert(fabs(1 - x[1]) < 1e-13);
 			x[0] = 1;
 			x[1] = 1;
-			R = p.minimize(R, x, l, u);
+			R = ER[1];
+			sigma = p.minimum(R, x);
+			sigma = p.minimize(R, x, l, u);
 			assert(fabs(0 - x[0]) < 1e-13);
 			assert(fabs(1 - x[1]) < 1e-13);
 		}

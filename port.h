@@ -3,15 +3,24 @@
 
 extern "C" {
 	double D1MACH(int*);
+	void DIVSET(int* ALG, int* IV, int* LIV, int* LV, double* V);
+
 	// W = A X + Y
 	void DV2AXY(int* N, double* W, double* A, double* X, double* Y);
-	void DIVSET(int* ALG, int* IV, int* LIV, int* LV, double* V);
+	
+	// compute X = LY
+	void DL7VML(int* N, double* X, double* L, double* Y);
+	// compute X = L'Y
+	void DL7TVM(int* N, double* X, double* L, double* Y);
 	// solve LX = Y
 	void DL7IVM(int* N, double* X, double* L, double* Y);
 	// solve L'X = Y
 	void DL7ITV(int* N, double* X, double* L, double* Y);
+	
 	// Cholesky factor A = LL'
 	void DL7SRT(int* N1, int* N, double* L, double* A, int* IRC);
+	
+	// minimization routines
 	//void DRMNF(double* D, double* FX, int* IV, int* LIV, int* LV, int* N, double* V, double* X);
 	void DMNF(int* N, double* D, double* X, void* F, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
 	void DMNG(int* N, double* D, double* X, void* F, void* G, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
@@ -69,4 +78,41 @@ namespace port {
 		BAD_CONSTRAINT = 84,  // — some row of the constraint matrix, C, is all zeros.
 		INC_CONSTRAINTS = 85, // — inconsistent constraints 
 	};
+
+	// pack lower triangle of a into l
+	inline void packl(int n, const double* a, double* l)
+	{
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j <= i; ++j) {
+				l[(i * (i + 1)) / 2 + j] = a[n * i + j];
+			}
+		}
+	}
+	// unpack l into lower triangle of a into l
+	inline void unpackl(int n, const double* l, double* a)
+	{
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j <= i; ++j) {
+				a[n * i + j] = l[(i * (i + 1)) / 2 + j];
+			}
+		}
+	}
+	// pack upper triangle of a into l
+	inline void packu(int n, const double* a, double* l)
+	{
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j <= i; ++j) {
+				l[(i * (i + 1)) / 2 + j] = a[i + n * j];
+			}
+		}
+	}
+	// unpack l into upper triangle of a into l
+	inline void unpacku(int n, const double* l, double* a)
+	{
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j <= i; ++j) {
+				a[i + n * j] = l[(i * (i + 1)) / 2 + j];
+			}
+		}
+	}
 }

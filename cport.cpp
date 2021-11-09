@@ -1,6 +1,6 @@
 // cport.cpp : Test PORT library
 #include <cassert>
-#include "dmn.h"
+#include "port_dmn.h"
 
 
 int d1mach_test()

@@ -1,4 +1,4 @@
-// dmn.h - PORT optimization routines
+// port_dmn.h - PORT optimization routines
 #pragma once
 #include "port.h"
 #include <vector>
