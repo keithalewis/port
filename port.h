@@ -1,5 +1,6 @@
 ﻿// cport.h - C declarations of PORT functions
 #pragma once
+#include <vector>
 
 extern "C" {
 	double D1MACH(int*);
@@ -19,15 +20,19 @@ extern "C" {
 	
 	// Cholesky factor A = LL'
 	void DL7SRT(int* N1, int* N, double* L, double* A, int* IRC);
+	// Set A to lower triangle of LL'
+	void DL7SQR(int* N, double* A, double* L);
+	// Set A to lower triangle of L'L
+	void DL7TSQ(int* N, double* A, double* L);
 	
 	// minimization routines
 	//void DRMNF(double* D, double* FX, int* IV, int* LIV, int* LV, int* N, double* V, double* X);
 	void DMNF(int* N, double* D, double* X, void* F, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
 	void DMNG(int* N, double* D, double* X, void* F, void* G, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
-	void DMNH(int* N, double* D, double* X, void* F, void* G, void* H, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
+	void DMNH(int* N, double* D, double* X, void* F, void* GH, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
 	void DMNFB(int* N, double* D, double* X, double* B, void* F, int* IV, int* LIV, int* LV, double* V, int* UIPARM, double* URPARM, void* UFPARM);
 	void DMNGB(int* N, double* D, double* X, double* B, void* F, void* G, int* IV, int* LIV, int* LV, double* V, int* UIPARM, double* URPARM, void* UFPARM);
-	void DMNHB(int* N, double* D, double* X, double* B, void* F, void* G, void* H, int* IV, int* LIV, int* LV, double* V, int* UIPARM, double* URPARM, void* UFPARM);
+	void DMNHB(int* N, double* D, double* X, double* B, void* F, void* GH, int* IV, int* LIV, int* LV, double* V, int* UIPARM, double* URPARM, void* UFPARM);
 }
 
 namespace port {
@@ -88,7 +93,7 @@ namespace port {
 			}
 		}
 	}
-	// unpack l into lower triangle of a into l
+	// unpack l into lower triangle of a
 	inline void unpackl(int n, const double* l, double* a)
 	{
 		for (int i = 0; i < n; ++i) {
@@ -106,7 +111,7 @@ namespace port {
 			}
 		}
 	}
-	// unpack l into upper triangle of a into l
+	// unpack l into upper triangle of a
 	inline void unpacku(int n, const double* l, double* a)
 	{
 		for (int i = 0; i < n; ++i) {
@@ -115,4 +120,47 @@ namespace port {
 			}
 		}
 	}
+	// unpack l into a
+	inline void unpack(int n, const double* l, double* a)
+	{
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j <= i; ++j) {
+				a[j + n * i] = a[i + n * j] = l[(i * (i + 1)) / 2 + j];
+			}
+		}
+	}
+
+	// x . y
+	inline double dot(size_t n, const double* x, const double* y, size_t stride = 1)
+	{
+		double s = 0;
+
+		for (size_t i = 0; i < n; ++i) {
+			s += x[i] * y[i * stride];
+		}
+
+		return s;
+	}
+
+	// x' LL' x = ||L'x||^2 , L packed
+	inline double quad(int n, const double* x, const double* L)
+	{
+		std::vector<double> x_(x, x + n);
+
+		DL7TVM(&n, x_.data(), (double*)L, x_.data());
+
+		return dot(n, x_.data(), x_.data());
+	}
+
+	// Cholesky decomposition of packed A into packed L. A = LL'
+	inline int cholesky(int n, double* A, double* L)
+	{
+		int n1 = 1;
+		int irc;
+		// Cholesky decomposition
+		DL7SRT(&n1, &n, L, A, &irc);
+
+		return irc;
+	}
+
 }

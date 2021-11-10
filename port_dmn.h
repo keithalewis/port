@@ -23,7 +23,7 @@ namespace port {
 		}
 
 		// reverse communication functions
-		typedef void(*FG)(int* N, double* X, int* NF, double* F, int* UI, double* UR, void* UF);
+		typedef void(*FGH)(int* N, double* X, int* NF, double* F, int* UI, double* UR, void* UF);
 
 		dmn(int n)
 			: n(n), liv(59 + 3*n), lv(78 + n * (n + 15)), iv(liv), v(lv), d(n, 1)
@@ -55,7 +55,7 @@ namespace port {
 		}
 
 		// function
-		RETURN_CODE solve(double* x, FG f, int* ui = 0, double* ur = 0, void* dummy = 0)
+		RETURN_CODE solve(double* x, FGH f, int* ui = 0, double* ur = 0, void* dummy = 0)
 		{
 			if (b.size() == 0) {
 				DMNF(&n, d.data(), x, f, iv.data(), &liv, &lv, v.data(), ui, ur, dummy);
@@ -68,7 +68,7 @@ namespace port {
 		}
 
 		// function and gradient
-		RETURN_CODE solve(double* x, FG f, FG g, int* ui = 0, double* ur = 0, void* dummy = 0)
+		RETURN_CODE solve(double* x, FGH f, FGH g, int* ui = 0, double* ur = 0, void* dummy = 0)
 		{
 			if (b.size() == 0) {
 				DMNG(&n, d.data(), x, f, g, iv.data(), &liv, &lv, v.data(), ui, ur, dummy);
@@ -79,7 +79,21 @@ namespace port {
 
 			return (RETURN_CODE)iv[0];
 		}
-		// void solve(/*QF f,*/ QF g, QF h ... call DMNFH
+
+		/*
+		// function, gradient, and hessian
+		RETURN_CODE solve(double* x, FGH f, FGH g, FGH h, int* ui = 0, double* ur = 0, void* dummy = 0)
+		{
+			if (b.size() == 0) {
+				DMNH(&n, d.data(), x, f, g, h, iv.data(), &liv, &lv, v.data(), ui, ur, dummy);
+			}
+			else {
+				DMNHB(&n, d.data(), x, b.data(), f, g, h, iv.data(), &liv, &lv, v.data(), ui, ur, dummy);
+			}
+
+			return (RETURN_CODE)iv[0];
+		}
+		*/
 	};
 
 } // namespace port

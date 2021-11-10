@@ -46,12 +46,11 @@ AddIn xai_unpack(
 	Function(XLL_FPX, "xll_unpack", "UNPACK")
 	.Arguments({
 		Arg(XLL_FPX, "L", "is a packed matrix."),
-		Arg(XLL_BOOL, "_upper", "is an optional argument indicating upper trangle of A is used. Default is lower.")
 		})
 	.FunctionHelp("Unpack L into lower or upper triangle of A.")
 	.Category(CATEGORY)
 );
-_FPX* WINAPI xll_unpack(_FPX* pl, BOOL upper)
+_FPX* WINAPI xll_unpack(_FPX* pl)
 {
 #pragma XLLEXPORT
 	static FPX a;
@@ -64,12 +63,7 @@ _FPX* WINAPI xll_unpack(_FPX* pl, BOOL upper)
 	int n = static_cast<int>((-1 + d) / 2);
 	a.resize(n, n);
 
-	if (upper) {
-		port::unpacku(n, pl->array, a.array());
-	}
-	else {
-		port::unpackl(n, pl->array, a.array());
-	}
+	port::unpack(n, pl->array, a.array());
 
 	return a.get();
 }
