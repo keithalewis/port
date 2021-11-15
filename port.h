@@ -26,10 +26,11 @@ extern "C" {
 	void DL7TSQ(int* N, double* A, double* L);
 	
 	// minimization routines
-	//void DRMNF(double* D, double* FX, int* IV, int* LIV, int* LV, int* N, double* V, double* X);
+	void DRMNF(double* D, double* FX, int* IV, int* LIV, int* LV, int* N, double* V, double* X);
 	void DMNF(int* N, double* D, double* X, void* F, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
 	void DMNG(int* N, double* D, double* X, void* F, void* G, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
 	void DMNH(int* N, double* D, double* X, void* F, void* GH, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
+	void DRMNFB(double* B, double* D, double* FX, int* IV, int* LIV, int* LV, int* N, double* V, double* X);
 	void DMNFB(int* N, double* D, double* X, double* B, void* F, int* IV, int* LIV, int* LV, double* V, int* UIPARM, double* URPARM, void* UFPARM);
 	void DMNGB(int* N, double* D, double* X, double* B, void* F, void* G, int* IV, int* LIV, int* LV, double* V, int* UIPARM, double* URPARM, void* UFPARM);
 	void DMNHB(int* N, double* D, double* X, double* B, void* F, void* GH, int* IV, int* LIV, int* LV, double* V, int* UIPARM, double* URPARM, void* UFPARM);
@@ -69,7 +70,7 @@ namespace port {
 		//44–62 — reserved.
 		FUNC_COMPUTE = 63, // — f(x) cannot be computed at the initial x.
 		BAD_PARAM = 64,    // — bad parameters on an internal call(should not occur).
-		GRAD_COMPUTE = 65, // — the gradient could not be computed at x.
+		BAD_GRAD = 65,     // — the gradient could not be computed at x.
 		BAD_INPUT = 66,    // — bad input array — if this return is relevant, see the associated PORT reference sheet
 		BAD_FIRST = 67,    // — bad first parameter(KIND in §2) to IVSET.
 		//68–69 — bugs encountered(should not occur).

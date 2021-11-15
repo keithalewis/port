@@ -7,7 +7,7 @@ namespace port {
 
 
 	class allocation {
-public:
+	public:
 		int n;
 		const double* ER;
 		const double* Cov; // !!!eliminate this
@@ -16,7 +16,7 @@ public:
 		double A, B, C, D;
 	public:
 		allocation(int n, const double* ER, const double* Cov, bool upper = false)
-			: n(n), ER(ER), Cov(Cov), L((n*(n + 1))/2), V_1(n, 1), V_ER(ER, ER + n)
+			: n(n), ER(ER), Cov(Cov), L((n* (n + 1)) / 2), V_1(n, 1), V_ER(ER, ER + n)
 		{
 			// packed triangular symmetric
 			if (upper) {
@@ -25,7 +25,7 @@ public:
 			else {
 				packl(n, Cov, L.data());
 			}
-		
+
 			// Cov = L L'
 			int irc = cholesky(n, L.data(), L.data());
 			// Cholesky decomposition L.data(), &irc);
@@ -81,10 +81,7 @@ public:
 			x[n] = lambda;
 			x[n + 1] = mu;
 
-			double sigma;
-			sigma = ((A * R * R - 2 * B * R + C) / D);
-			double s;
-			s = quad(n, x, L.data());
+			double sigma = (A * R * R - 2 * B * R + C) / D;
 			sigma = sqrt(sigma);
 
 			return sigma;
@@ -115,6 +112,7 @@ public:
 				double one = 1;
 				*F -= lambda * (dot(n, X, &one, 0) - 1);
 				*F -= mu * (dot(n, X, p->ER) - R);
+				*F = *F;
 			};
 
 			auto g = [](int* /*N*/, double* X, int* /*NF*/, double* G, int* /*UI*/, double* UR, void* UF) {
@@ -128,7 +126,7 @@ public:
 				DL7TVM(&n, G, p->L.data(), X); // G = L' xi
 				DL7VML(&n, G, p->L.data(), G); // G = L G = L L' xi
 				for (int i = 0; i < n; ++i) {
-					G[i] += - lambda - mu*p->ER[i];
+					G[i] += -lambda - mu * p->ER[i];
 				}
 
 				double one = 1;
@@ -141,9 +139,9 @@ public:
 				int n = p->n;
 				DL7SQR(&n, H, p->L.data());
 			};
-		
+
 			RETURN_CODE ret;
-			ret = p.solve(x, f, g, 0, &R, (void*)this);
+			ret = p.solve(x, f, 0, &R, (void*)this);
 
 			return 0; // p.v[?];
 		}
@@ -232,4 +230,3 @@ public:
 	};
 
 } // namespace port
-

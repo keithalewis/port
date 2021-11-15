@@ -46,24 +46,20 @@ int allocation_test()
 			assert(fabs(ER[1] - R) < 1e-12);
 		}
 		{
-			double l[] = { -DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX };
-			double u[] = { DBL_MAX, DBL_MAX, DBL_MAX, DBL_MAX };
-			/*
-			double l[] = { -DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX };
-			double u[] = { DBL_MAX, DBL_MAX, DBL_MAX, DBL_MAX };
-			assert(fabs(0 - x[0]) < 1e-11);
-			assert(fabs(1 - x[1]) < 1e-11);
-			x[0] = 1;
-			x[1] = 1;
-			*/
+			double lu = 10;// DBL_MAX;
+			double l[] = { -lu, -lu, -DBL_MAX, -DBL_MAX };
+			double u[] = { lu, lu, DBL_MAX, DBL_MAX };
 			R = ER[1];
+
 			sigma = p.minimum(R, x);
+			/*
 			sigma = p.minimize(R, x, l, u);
 			assert(fabs(0 - x[0]) < 1e-11);
 			assert(fabs(1 - x[1]) < 1e-11);
+			*/
 
-			x[0] += .1;
-			x[1] -= .1;
+			x[0] += .01;
+			x[1] -= .01;
 			sigma = p.minimize(R, x, l, u);
 			assert(fabs(0 - x[0]) < 1e-11);
 			assert(fabs(1 - x[1]) < 1e-11);
