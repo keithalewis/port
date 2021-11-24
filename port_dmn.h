@@ -6,27 +6,27 @@
 
 namespace port {
 
-	// minimize unconstrained objective function
+	// minimize objective function
 	struct dmn {
 		int n, liv, lv;
 		std::vector<int> iv;
 		std::vector<double> v, d, b;
-		
+	
 		// initialize upper and lower bounds
 		void bounds()
 		{
 			b.resize(2 * n);
-			double x = DBL_MAX;
-			upper(&x, 0);
-			x = -x;
-			lower(&x, 0);
+			for (int i = 0; i < n; ++i) {
+				b[2*i] = -DBL_MAX;
+				b[2*i + 1] = DBL_MAX;
+			}
 		}
 
 		// reverse communication functions
 		typedef void(*FGH)(int* N, double* X, int* NF, double* F, int* UI, double* UR, void* UF);
 
 		dmn(int n)
-			: n(n), liv(59), iv(liv), lv(71), v(lv), d(n, 1)
+			: n(n), liv(59 + 3*n), iv(liv), lv(78 + (n * (n + 27)) / 2), v(lv), d(n, 1)
 		{
 			//int alg = 2; // general optimization
 			//DIVSET(&alg, &iv[0], &liv, &lv, &v[0]);
@@ -36,24 +36,54 @@ namespace port {
 		~dmn()
 		{ }
 
+		// control printing to console
+		void print(int i = 2) // stdout
+		{
+			iv[20] = i ? I1MACH(&i) : 0;
+		}
+
+		// initial step size
+		void step0(double LMAX0 = 1)
+		{
+			v[34] = LMAX0;
+		}
+
 		// set lower bounds
-		void lower(const double* l, size_t stride = 1)
+		void lower(double l)
 		{
 			if (b.size() == 0) {
 				bounds();
 			}
 			for (int i = 0; i < n; ++i) {
-				b[2 * i] = l[i * stride];
+				b[2 * i] = l;
+			}
+		}
+		void lower(const double* l)
+		{
+			if (b.size() == 0) {
+				bounds();
+			}
+			for (int i = 0; i < n; ++i) {
+				b[2 * i] = l[i];
 			}
 		}
 		// set upper bounds
-		void upper(const double* u, size_t stride = 1)
+		void upper(double u)
 		{
 			if (b.size() == 0) {
 				bounds();
 			}
 			for (int i = 0; i < n; ++i) {
-				b[2 * i + 1] = u[i * stride];
+				b[2 * i + 1] = u;
+			}
+		}
+		void upper(const double* u)
+		{
+			if (b.size() == 0) {
+				bounds();
+			}
+			for (int i = 0; i < n; ++i) {
+				b[2 * i + 1] = u[i];
 			}
 		}
 
@@ -61,44 +91,10 @@ namespace port {
 		RETURN_CODE solve(double* x, FGH f, int* ui = 0, double* ur = 0, void* uf = 0)
 		{
 			if (b.size() == 0) {
-				double fx;
-				DRMNF(&d[0], &fx, &iv[0], &liv, &lv, &n, &v[0], x);
-				liv = iv[43]; // IVLAST
-				iv.resize(liv);
-				lv = iv[44]; // VLAST
-				v.resize(lv);
-
-				iv[0] = 0;
-				DRMNF(&d[0], &fx, &iv[0], &liv, &lv, &n, &v[0], x);
-
-				while (iv[0] <= 2) {
-					int nf = iv[5]; // NFCALL
-					f(&n, x, &nf, &fx, ui, ur, uf);
-					DRMNF(&d[0], &fx, &iv[0], &liv, &lv, &n, &v[0], x);
-					if (nf <= 0) {
-						iv[1] = 1; // TOOBIG
-					}
-				}
+				DMNF(&n, &d[0], &x[0], f, &iv[0], &liv, &lv, &v[0], ui, ur, uf);
 			}
 			else {
-				double fx;
-				DRMNFB(&b[0], &d[0], &fx, &iv[0], &liv, &lv, &n, &v[0], x);
-				liv = iv[43]; // IVLAST
-				iv.resize(liv);
-				lv = iv[44]; // VLAST
-				v.resize(lv);
-
-				iv[0] = 0;
-				DRMNFB(&b[0], &d[0], &fx, &iv[0], &liv, &lv, &n, &v[0], x);
-
-				while (iv[0] <= 2) {
-					int nf = iv[5]; // NFCALL
-					f(&n, x, &nf, &fx, ui, ur, uf);
-					DRMNFB(&b[0], &d[0], &fx, &iv[0], &liv, &lv, &n, &v[0], x);
-					if (nf <= 0) {
-						iv[1] = 1; // TOOBIG
-					}
-				}
+				DMNFB(&n, &d[0], x, &b[0], f, &iv[0], &liv, &lv, &v[0], ui, ur, uf);
 			}
 
 			return (RETURN_CODE)iv[0];

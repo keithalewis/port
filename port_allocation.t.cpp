@@ -4,7 +4,6 @@
 
 using namespace port;
 
-
 int allocation_test()
 {
 	{
@@ -19,6 +18,7 @@ int allocation_test()
 		assert(L[0] == 1 && L[1] == 2 && L[2] == 3);
 
 		allocation p(n, ER, Cov, false);
+		//p.print(0);
 
 		// L = [1 0; 2 3], L^-1 = [1 0; -2/3 1/3]
 		// V = L L', V^-1 = L'^-1 L^-1
@@ -28,6 +28,18 @@ int allocation_test()
 
 		double x[4];
 		double R, sigma;
+
+		{
+			x[0] = 0;
+			x[1] = 0;
+			assert(0 == quad(2, x, L));
+			x[0] = 1;
+			assert(1 == quad(2, x, L));
+			x[1] = 1;
+			assert(1 + 2 * 2 + 13 == quad(2, x, L));
+			sigma = p.fmin(0, x, 0, 0);
+			sigma = quad(2, x, L) / 2;
+		}
 
 		{
 			R = ER[0];
@@ -46,33 +58,28 @@ int allocation_test()
 			assert(fabs(ER[1] - R) < 1e-12);
 		}
 		{
-			double lu = 10;// DBL_MAX;
+			double lu = 0;// DBL_MAX;
 			double l[] = { -lu, -lu, -DBL_MAX, -DBL_MAX };
-			double u[] = { lu, lu, DBL_MAX, DBL_MAX };
+			double u[] = { DBL_MAX, DBL_MAX, DBL_MAX, DBL_MAX };
+
 			R = ER[1];
-
 			sigma = p.minimum(R, x);
-			/*
-			sigma = p.minimize(R, x, l, u);
 			assert(fabs(0 - x[0]) < 1e-11);
 			assert(fabs(1 - x[1]) < 1e-11);
-			*/
 
-			x[0] += .01;
-			x[1] -= .01;
-			sigma = p.minimize(R, x, l, u);
-			assert(fabs(0 - x[0]) < 1e-11);
-			assert(fabs(1 - x[1]) < 1e-11);
+			x[0] += .001;
+			x[1] -= .001;
+			//p.lower(l);
+			//p.upper(u);
+			sigma = p.minimize(R, x);
 		}
 		/*
 		{
-			double l[] = { 1, 1, -DBL_MAX, -DBL_MAX };
+			double l[] = { .1, .1, -DBL_MAX, -DBL_MAX };
 			R = ER[0];
-			R = p.maximize(sigma, x);
-			sigma = p.minimize(R, x, l);
-			//assert(fabs(1 - x[0]) < 1e-11);
-			//assert(fabs(0 - x[1]) < 1e-11);
-			//assert(fabs(ER[0] - R) < 1e-11);
+			R = p.maximum(sigma, x);
+			R = p.maximize(sigma, x, l);
+			R = R;
 		}
 		*/
 	}

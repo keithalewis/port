@@ -17,6 +17,10 @@ AddIn xai_pack(
 		})
 	.FunctionHelp("Pack lower or upper triangle of A.")
 	.Category(CATEGORY)
+	.Documentation(R"(
+Pack lower \([a_{ij}\) as \([a_{00}, a_{10}, a_{11}, a_{20}, a_{21}, a_{22},\ldots]\)
+and upper as \([a_{00}, a_{01}, a_{11}, a_{02}, a_{12}, a_{22},\ldots]\).
+)")
 );
 _FPX* WINAPI xll_pack(_FPX* pa, BOOL upper)
 {
@@ -47,7 +51,7 @@ AddIn xai_unpack(
 	.Arguments({
 		Arg(XLL_FPX, "L", "is a packed matrix."),
 		})
-	.FunctionHelp("Unpack L into lower or upper triangle of A.")
+	.FunctionHelp("Unpack L into symmetric A.")
 	.Category(CATEGORY)
 );
 _FPX* WINAPI xll_unpack(_FPX* pl)
@@ -125,3 +129,60 @@ _FPX* WINAPI xll_dl7srt(_FPX* pa, int n1)
 	return irc == 0 ? pa : nullptr;
 }
 
+AddIn xai_DL7TVM(
+	Function(XLL_FPX, "xll_DL7TVM", "DL7TVM")
+	.Arguments({
+		Arg(XLL_FPX, "L", "is packed lower triangular matrix."),
+		Arg(XLL_FPX, "Y", "is a vector.")
+		})
+	.FunctionHelp("Compute L' Y.")
+	.Category(CATEGORY)
+	.Documentation(R"(
+<pre>
+C  ***  COMPUTE  X = (L**T)*Y, WHERE  L  IS AN  N X N  LOWER
+C  ***  TRIANGULAR MATRIX STORED COMPACTLY BY ROWS.  X AND Y MAY
+C  ***  OCCUPY THE SAME STORAGE.  ***
+</pre>
+)")
+);
+_FPX* WINAPI xll_DL7TVM(_FPX* pl, _FPX* py)
+{
+#pragma XLLEXPORT
+	int n = size(*py);
+	if ((n * (n + 1)) / 2 == (int)size(*py)) {
+		return nullptr;
+	}
+
+	DL7TVM(&n, py->array, pl->array, py->array);
+
+	return py;
+}
+
+AddIn xai_DL7VML(
+	Function(XLL_FPX, "xll_DL7VML", "DL7VML")
+	.Arguments({
+		Arg(XLL_FPX, "L", "is packed lower triangular matrix."),
+		Arg(XLL_FPX, "Y", "is a vector.")
+		})
+	.FunctionHelp("Compute L Y.")
+	.Category(CATEGORY)
+	.Documentation(R"(
+<pre>
+C  ***  COMPUTE  X = L*Y, WHERE  L  IS AN  N X N  LOWER TRIANGULAR
+C  ***  MATRIX STORED COMPACTLY BY ROWS.  X AND Y MAY OCCUPY THE SAME
+C  ***  STORAGE.  ***
+</pre>
+)")
+);
+_FPX* WINAPI xll_DL7VML(_FPX* pl, _FPX* py)
+{
+#pragma XLLEXPORT
+	int n = size(*py);
+	if ((n * (n + 1)) / 2 == (int)size(*py)) {
+		return nullptr;
+	}
+
+	DL7VML(&n, py->array, pl->array, py->array);
+
+	return py;
+}

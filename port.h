@@ -4,39 +4,105 @@
 
 extern "C" {
 	double D1MACH(int*);
+	int I1MACH(int*);
 	void DIVSET(int* ALG, int* IV, int* LIV, int* LV, double* V);
 
 	// W = A X + Y
-	void DV2AXY(int* N, double* W, double* A, double* X, double* Y);
+	void DV2AXY(int* N, double* W, const double* A, const double* X, const double* Y);
 	
 	// compute X = LY
-	void DL7VML(int* N, double* X, double* L, double* Y);
+	void DL7VML(const int* N, double* X, const double* L, const double* Y);
 	// compute X = L'Y
-	void DL7TVM(int* N, double* X, double* L, double* Y);
+	void DL7TVM(const int* N, double* X, const double* L, const double* Y);
 	// solve LX = Y
 	void DL7IVM(int* N, double* X, double* L, double* Y);
 	// solve L'X = Y
 	void DL7ITV(int* N, double* X, double* L, double* Y);
 	
 	// Cholesky factor A = LL'
-	void DL7SRT(int* N1, int* N, double* L, double* A, int* IRC);
+	void DL7SRT(const int* N1, const int* N, double* L, const double* A, int* IRC);
 	// Set A to lower triangle of LL'
-	void DL7SQR(int* N, double* A, double* L);
+	void DL7SQR(int* N, double* A, const double* L);
 	// Set A to lower triangle of L'L
-	void DL7TSQ(int* N, double* A, double* L);
+	void DL7TSQ(int* N, double* A, const double* L);
+
+	// Compute finite difference gradient by Stewart*s scheme
+	void DS7GRD(double* ALPHA, double* D, double* ETA0, double* FX, double* G, int* IRC, int* N, double* W, double* X);
 	
 	// minimization routines
-	void DRMNF(double* D, double* FX, int* IV, int* LIV, int* LV, int* N, double* V, double* X);
 	void DMNF(int* N, double* D, double* X, void* F, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
 	void DMNG(int* N, double* D, double* X, void* F, void* G, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
 	void DMNH(int* N, double* D, double* X, void* F, void* GH, int* IV, int* LIV, int* LV, double* V, int* UI, double* UR, void* DUMMY);
-	void DRMNFB(double* B, double* D, double* FX, int* IV, int* LIV, int* LV, int* N, double* V, double* X);
 	void DMNFB(int* N, double* D, double* X, double* B, void* F, int* IV, int* LIV, int* LV, double* V, int* UIPARM, double* URPARM, void* UFPARM);
 	void DMNGB(int* N, double* D, double* X, double* B, void* F, void* G, int* IV, int* LIV, int* LV, double* V, int* UIPARM, double* URPARM, void* UFPARM);
 	void DMNHB(int* N, double* D, double* X, double* B, void* F, void* GH, int* IV, int* LIV, int* LV, double* V, int* UIPARM, double* URPARM, void* UFPARM);
+	void DRMNF(double* D, double* FX, int* IV, int* LIV, int* LV, int* N, double* V, double* X);
+	void DRMNFB(double* B, double* D, double* FX, int* IV, int* LIV, int* LV, int* N, double* V, double* X);
 }
 
 namespace port {
+
+	enum IV {
+		COVMAT = 26,
+		COVPRT = 14,
+		COVREQ = 15,
+		D = 27,
+		DRADPR = 101,
+		DTOL = 59,
+		DTYPE = 16,
+		INITS = 25,
+		LASTIV = 44,
+		LASTV = 45,
+		MC = 83,
+		ME = 86,
+		ME1 = 87,
+		MODE = 35,
+		MODEL = 5,
+		MXFCAL = 17,
+		NEXTIV = 46,
+		NEXTV = 47,
+		NFCALL = 6,
+		NFCOV = 52,
+		NFGCAL = 7,
+		NGCALL = 30,
+		NGCOV = 53,
+		NITER = 31,
+		OUTLEV = 19,
+		PARPRT = 20,
+		PC = 90,
+		PRUNIT = 21,
+	};
+
+	enum V {
+		AFCTOL = 31,
+		COSMIN = 47,
+		D0INIT = 40,
+		DELTA0 = 44,
+		DFAC = 41,
+		DGNORM = 1,
+		DINIT = 38,
+		DLTFDC = 42,
+		DLTFDJ = 43,
+		DSTNRM = 2,
+		DTINIT = 39,
+		ETA0 = 42,
+		F = 10,
+		F0 = 13,
+		FUZZ = 45,
+		LMAX0 = 35,
+		LMAXS = 36,
+		NREDUC = 6,
+		PREDUC = 7,
+		RADIUS = 8,
+		RCOND = 53,
+		RELDX = 17,
+		RFCTOL = 32,
+		RLIMIT = 46,
+		SCTOL = 37,
+		STPPAR = 5,
+		XCTOL = 33,
+		XFTOL = 34,
+	};
 
 	// First value of IV after regression or optimization is run
 	enum class RETURN_CODE {
@@ -148,13 +214,13 @@ namespace port {
 	{
 		std::vector<double> x_(x, x + n);
 
-		DL7TVM(&n, x_.data(), (double*)L, x_.data());
+		DL7TVM(&n, x_.data(), L, x_.data());
 
 		return dot(n, x_.data(), x_.data());
 	}
 
 	// Cholesky decomposition of packed A into packed L. A = LL'
-	inline int cholesky(int n, double* A, double* L)
+	inline int cholesky(int n, const double* A, double* L)
 	{
 		int n1 = 1;
 		int irc;

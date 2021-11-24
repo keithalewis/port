@@ -21,11 +21,9 @@
     <ClCompile Include="port_allocation.t.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="x64\Debug\port.lib">
+    <ClCompile Include="port_dmn.t.cpp">
       <Filter>Source Files</Filter>
-    </Library>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="port_dmn.h">
@@ -37,5 +35,8 @@
     <ClInclude Include="port_allocation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="x64\Debug\port.lib" />
   </ItemGroup>
 </Project>
