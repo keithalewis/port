@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "port", "port.vfproj", "{230556D4-998D-4310-8146-C1903D5E899D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cport", "cport.vcxproj", "{1EC36239-003D-452F-A97E-B4833C46AD5B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{230556D4-998D-4310-8146-C1903D5E899D} = {230556D4-998D-4310-8146-C1903D5E899D}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

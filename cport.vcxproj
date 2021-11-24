@@ -75,17 +75,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <LibraryPath>$(oneMKLOmpLibDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <LibraryPath>$(oneMKLOmpLibDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>$(oneMKLOmpLibDir);port;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(oneMKLOmpLibDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>$(oneMKLOmpLibDir);port;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(oneMKLOmpLibDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -154,6 +156,7 @@
     <ClCompile Include="port_dmn.t.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="Debug\port.lib" />
     <Library Include="x64\Debug\port.lib" />
   </ItemGroup>
   <ItemGroup>

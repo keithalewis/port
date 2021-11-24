@@ -38,5 +38,6 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="x64\Debug\port.lib" />
+    <Library Include="Debug\port.lib" />
   </ItemGroup>
 </Project>

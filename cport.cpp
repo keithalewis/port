@@ -29,7 +29,6 @@ int quad_test()
 }
 int quad_test_ = quad_test();
 
-
 int main()
 {
 	return 0;
