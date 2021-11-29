@@ -10,6 +10,9 @@ int allocation_test()
 		int n = 2;
 		double ER[] = { 1.1,1.2 };
 		double Cov[] = { 1, 2, 2, 13 };
+
+		std::valarray<double> y({ .5,.5 });
+		allocation::normalize(y, 1.3, ER);
 		
 		double L[3];
 		port::packl(2, Cov, L);
@@ -46,16 +49,16 @@ int allocation_test()
 			sigma = p.minimum(R, x);
 			assert(fabs(1 - x[0]) < 1e-12);
 			assert(fabs(0 - x[1]) < 1e-12);
-			R = p.maximum(sigma, x);
-			assert(fabs(ER[0] - R) < 1e-12);
+			//R = p.maximum(sigma, x);
+			//assert(fabs(ER[0] - R) < 1e-12);
 		}
 		{
 			R = ER[1];
 			sigma = p.minimum(R, x);
 			assert(fabs(0 - x[0]) < 1e-12);
 			assert(fabs(1 - x[1]) < 1e-12);
-			R = p.maximize(sigma, x);
-			assert(fabs(ER[1] - R) < 1e-12);
+			//R = p.maximize(sigma, x);
+			//assert(fabs(ER[1] - R) < 1e-12);
 		}
 		{
 			double lu = 0;// DBL_MAX;

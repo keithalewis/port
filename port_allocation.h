@@ -2,11 +2,11 @@
 #pragma once
 #include <valarray>
 #include <vector>
-#include "port_dmn.h"
+#include "port.h"
 
 namespace port {
 
-	class allocation : public dmn {
+	class allocation {
 	public:
 		int N;
 		std::vector<double> ER; // expected realized returns
@@ -54,11 +54,13 @@ namespace port {
 			return Var(xi) / 2 - lambda * (xi_1(xi) - 1) - mu * (xi_ER(xi) - R);
 		}
 		// xi_ = a xi + b 1, 1 = xi_' 1, R = xi_' ER
-		void normalize(std::valarray<double>& xi, double R)
+		static void normalize(std::valarray<double>& xi, double R, const double* ER)
 		{
-			double _1xi = xi_1(&xi[0]); // 1' xi
-			double ER_xi = xi_ER(&xi[0]); // ER' xi
-			double ER_1 = xi_1(&ER[0]); // ER' 1
+			auto N = xi.size();
+			double _1xi = xi.sum(); // 1' xi
+			double ER_xi = dot(N, ER, &xi[0]); // ER' xi
+			double one = 1;
+			double ER_1 = dot(N, ER, &one, 0); // ER' 1
 			double d_ = _1xi * ER_1 - ER_xi * N;
 			double a_ = (ER_1 - N * R) / d_;
 			double b_ = (-ER_xi + _1xi * R) / d_;
@@ -99,7 +101,7 @@ namespace port {
 		*/
 
 		allocation(int N, const double* ER_, const double* Cov, bool upper)
-			: dmn(N - 2), N(N), ER(ER_, ER_ + N), L((N* (N + 1)) / 2), V_1(N, 1), V_ER(ER_, ER_ + N)
+			: N(N), ER(ER_, ER_ + N), L((N* (N + 1)) / 2), V_1(N, 1), V_ER(ER_, ER_ + N)
 		{
 			// packed triangular symmetric
 			if (upper) {
@@ -160,13 +162,34 @@ namespace port {
 		}
 		// F(x + h) = F(x) + DF(x)h + o(||h||)
 		// x' = x - gamma DF(x) >= 0
+		double stepmin(double R, double* x)
+		{
+			double lambda = x[N];
+			double mu = x[N + 1];
+
+			std::valarray<double> g(N + 2);
+			gmin(R, x, lambda, mu, &g[0]);
+
+			// largest gamma for which xi >= 0
+			double gamma = DBL_MAX;
+			for (int i = 0; i < N; ++i) {
+				gamma = std::min(gamma, x[i] / g[i]);
+			}
+			for (int i = 0; i < N + 2; ++i) {
+				x[i] -= gamma * g[i];
+			}
+			lambda = x[N];
+			mu = x[N + 1];
+
+			return gamma;
+		}
 		double minimize(double R, double* x)
 		{
 			double lambda = x[N];
 			double mu = x[N + 1];
 			double f0 = fmin(R, x, lambda, mu);
 
-			std::valarray<double> g(n + 2);
+			std::valarray<double> g(N + 2);
 			gmin(R, x, lambda, mu, &g[0]);
 
 			// largest gamma for which xi >= 0
@@ -225,7 +248,6 @@ namespace port {
 
 			return v[10];
 		}
-#endif 0
 		// Maximize expected return given volatility
 		// maximize xi' EX - lambda (xi' x - 1) - mu/2 (xi' V xi - sigma^2)
 		// 0 = EX - lambda x - mu V xi
@@ -306,6 +328,7 @@ namespace port {
 
 			return -p.v[10]; // optimal value
 		}
+#endif 0
 	};
 
 } // namespace port
