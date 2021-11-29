@@ -27,10 +27,7 @@ namespace port {
 
 		dmn(int n)
 			: n(n), liv(59 + 3*n), iv(liv), lv(78 + (n * (n + 27)) / 2), v(lv), d(n, 1)
-		{
-			//int alg = 2; // general optimization
-			//DIVSET(&alg, &iv[0], &liv, &lv, &v[0]);
-		}
+		{ }
 		dmn(const dmn&) = delete;
 		dmn& operator=(const dmn&) = delete;
 		~dmn()
@@ -91,6 +88,8 @@ namespace port {
 		RETURN_CODE solve(double* x, FGH f, int* ui = 0, double* ur = 0, void* uf = 0)
 		{
 			if (b.size() == 0) {
+				//double FX;
+				//DRMNF(&d[0], &FX, &iv[0], &liv, &lv, &n, &v[0], &x[0]);
 				DMNF(&n, &d[0], &x[0], f, &iv[0], &liv, &lv, &v[0], ui, ur, uf);
 			}
 			else {

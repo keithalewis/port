@@ -86,4 +86,4 @@ int allocation_test()
 
 	return 0;
 }
-//int allocation_test_ = allocation_test();
+int allocation_test_ = allocation_test();
